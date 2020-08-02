@@ -6,7 +6,7 @@ use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::{fs, io};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Entry {
     pub slug: String,
     pub content: String,
@@ -14,9 +14,18 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub fn new(slug: &str, content: &str, meta: markdown::utils::Meta) -> Entry {
+    pub fn new(path: &str) -> Entry {
+        let re = Regex::new(r"content/").unwrap();
+        let slug = utils::double_quote_regex().replace_all(path, "$slug");
+        let p = format!("{}/index.md", &slug);
+        let markdown_path = Path::new(&p);
+        let md = utils::cat(&markdown_path).unwrap_or("".to_owned());
+        let content = markdown::utils::md2html(markdown::utils::get_content(&md));
+        let meta = markdown::utils::Meta::new(&p);
+        let slug = re.replace_all(&slug, "");
+
         Entry {
-            slug: slug.to_owned(),
+            slug: slug.to_owned().to_string(),
             content: content.to_owned(),
             meta: meta,
         }
@@ -74,13 +83,21 @@ pub fn build_all() {
 pub fn build_specific(path: &str) {
     let p = format!("{}/index.md", path);
     let markdown_path = &Path::new(&p);
+    let template = Path::new("templates/post.html");
+    let header_template = Path::new("templates/header.html");
 
     match utils::cat(markdown_path) {
         Err(why) => println!("Error: {:?}", why.kind()),
-        Ok(s) => {
-            let html = markdown::utils::md2html(markdown::utils::get_content(&s));
+        Ok(_) => {
             let fname = format!("{}/index.html", path);
             let html_path = &Path::new(&fname);
+            let mut handlebars = Handlebars::new();
+
+            if let Err(why) =
+                handlebars.register_partial("headerPartial", utils::cat(&header_template).unwrap())
+            {
+                println!("{:?}", why);
+            }
 
             if !html_path.exists() {
                 if let Err(why) = utils::touch(html_path) {
@@ -88,7 +105,12 @@ pub fn build_specific(path: &str) {
                 }
             }
 
-            if let Err(why) = utils::echo(&html, html_path) {
+            let entry = Entry::new(&path);
+            let template = handlebars
+                .render_template(&utils::cat(&template).unwrap(), &entry)
+                .unwrap();
+
+            if let Err(why) = utils::echo(&template, html_path) {
                 println!("Error: {:?}", why.kind());
             }
         }
@@ -98,19 +120,10 @@ pub fn build_specific(path: &str) {
 pub fn get_entries() -> Vec<Entry> {
     let paths = utils::list();
     let mut entries: Vec<Entry> = vec![];
-    let re = Regex::new(r"content/").unwrap();
 
     for path in paths {
         let path = format!("{:?}", path.unwrap().path());
-        let slug = utils::double_quote_regex().replace_all(&path, "$slug");
-        let p = format!("{}/index.md", &slug);
-        let markdown_path = Path::new(&p);
-        let md = utils::cat(&markdown_path).unwrap_or("".to_owned());
-        let content = markdown::utils::get_content(&md);
-        let meta = markdown::utils::get_meta(&md, &markdown_path);
-        let slug = re.replace_all(&slug, "");
-
-        entries.push(Entry::new(&slug, &content, meta));
+        entries.push(Entry::new(&path));
     }
 
     entries
@@ -118,12 +131,19 @@ pub fn get_entries() -> Vec<Entry> {
 
 pub fn build_top() {
     let template = Path::new("templates/index.html");
+    let header_template = Path::new("templates/header.html");
 
     match utils::cat(&template) {
         Err(why) => println!("{:?}", why.kind()),
         Ok(html) => {
             let entries = get_entries();
-            let handlebars = Handlebars::new();
+            let mut handlebars = Handlebars::new();
+
+            if let Err(why) =
+                handlebars.register_partial("headerPartial", utils::cat(&header_template).unwrap())
+            {
+                println!("{:?}", why);
+            }
 
             match handlebars.render_template(&html, &entries) {
                 Err(why) => println!("{:?}", why),

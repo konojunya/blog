@@ -1,3 +1,4 @@
+use crate::markdown;
 use chrono::{DateTime, Local, TimeZone};
 use pulldown_cmark::{html, Parser};
 use regex::Regex;
@@ -108,7 +109,7 @@ pub fn get_content(md: &str) -> &str {
 }
 
 pub fn md2html(md: &str) -> String {
-    let parser = Parser::new(md);
+    let parser = Parser::new(md).map(|event| markdown::traverser::heading_1_to_2(event));
     let mut html = String::new();
     html::push_html(&mut html, parser);
 
@@ -151,7 +152,7 @@ tags: tag1,tag2
 "#;
         assert_eq!(
             md2html(get_content(&md)),
-            r#"<h1>title</h1>
+            r#"<h2>title</h2>
 "#
         );
     }

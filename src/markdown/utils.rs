@@ -115,3 +115,44 @@ pub fn md2html(md: &str) -> String {
     let html = html;
     html
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_content() {
+        let md = r#"
+---
+title: title
+excerpt: excerpt
+tags: tag1,tag2
+---
+
+# title"#;
+        assert_eq!(
+            get_content(&md),
+            r#"
+
+# title"#
+        );
+    }
+
+    #[test]
+    fn test_md2html() {
+        let md = r#"
+---
+title: title
+excerpt: excerpt
+tags: tag1,tag2
+---
+
+# title
+"#;
+        assert_eq!(
+            md2html(get_content(&md)),
+            r#"<h1>title</h1>
+"#
+        );
+    }
+}

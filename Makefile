@@ -3,5 +3,8 @@ clean:
 	mkdir content
 	touch content/.gitkeep
 
+build:
+	docker build . -t h2o-server
+
 serve:
-	serve content
+	docker run -p 8080:8080 h2o-server

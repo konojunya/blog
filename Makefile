@@ -4,7 +4,7 @@ clean:
 	touch content/.gitkeep
 
 build:
-	docker build . -t h2o-server
+	docker build . -t nginx-server
 
 serve:
-	docker run -p 8080:8080 h2o-server
+	docker run -p 8080:8080 nginx-server

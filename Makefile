@@ -3,5 +3,8 @@ clean:
 	mkdir content
 	touch content/.gitkeep
 
+build:
+	docker build . -t nginx-server
+
 serve:
-	serve content
+	docker run -p 8080:8080 nginx-server

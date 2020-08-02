@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<title>ブログ</title>
+<main>
+  <h1>Archive</h1>
+  <ul>
+    {{#each this}}
+    <li>
+      <time datetime="{{meta.created_at}}">{{meta.created_at}}</time>
+      <a href="{{slug}}">{{meta.title}}</a>
+    </li>
+    {{/each}}
+  </ul>
+</main>
+</html>

@@ -1,45 +1,105 @@
+use chrono::{DateTime, Local, TimeZone};
 use pulldown_cmark::{html, Parser};
 use regex::Regex;
+use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde::Deserialize;
+use std::path::Path;
+use std::time::UNIX_EPOCH;
 
+#[derive(Deserialize)]
 pub struct Meta {
-    pub titie: String,
+    pub title: String,
     pub excerpt: String,
-    pub created_at: i64,
-    pub update_at: i64,
     pub tags: Vec<String>,
+    pub created_at: u64,
+    pub update_at: u64,
 }
 
-pub fn get_meta(md: &str) -> Meta {
+impl Meta {
+    pub fn new(
+        title: String,
+        excerpt: String,
+        tags: Vec<String>,
+        created_at: u64,
+        update_at: u64,
+    ) -> Meta {
+        Meta {
+            title: title,
+            excerpt: excerpt,
+            tags: tags,
+            created_at: created_at,
+            update_at: update_at,
+        }
+    }
+}
+
+impl Serialize for Meta {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Entry", 5)?;
+        s.serialize_field("title", &self.title)?;
+        s.serialize_field("excerpt", &self.excerpt)?;
+        s.serialize_field("tags", &self.tags)?;
+
+        let created: DateTime<Local> = Local.timestamp(self.created_at as i64, 0);
+        s.serialize_field("created_at", &created.format("%Y-%m-%d").to_string())?;
+
+        let updated: DateTime<Local> = Local.timestamp(self.update_at as i64, 0);
+        s.serialize_field("update_at", &updated.format("%Y-%m-%d").to_string())?;
+        s.end()
+    }
+}
+
+pub fn get_meta(md: &str, path: &Path) -> Meta {
     let sp: Vec<&str> = md.splitn(3, "---").collect();
     let meta_str = sp[1];
 
     // title
-    let title_regex = Regex::new(r"title: (?P<title>.*)").unwrap();
-    let title_cap = title_regex.captures(&meta_str).unwrap();
-    let title = title_cap.name("title").unwrap();
+    let re = Regex::new(r"title: (?P<title>.*)").unwrap();
+    let cap = re.captures(&meta_str).unwrap();
+    let title = cap.name("title").unwrap();
 
     //  excerpt
-    let excerpt_regex = Regex::new(r"excerpt: (?P<excerpt>.*)").unwrap();
-    let excerpt_cap = excerpt_regex.captures(&meta_str).unwrap();
-    let excerpt = excerpt_cap.name("excerpt").unwrap();
-
-    // created_at
-    // updated_at
+    let re = Regex::new(r"excerpt: (?P<excerpt>.*)").unwrap();
+    let cap = re.captures(&meta_str).unwrap();
+    let excerpt = cap.name("excerpt").unwrap();
 
     // tags
-    let tags_regex = Regex::new(r"- (.*)").unwrap();
-    let mut tags = Vec::new();
-    for tag in tags_regex.captures_iter(&meta_str) {
-        tags.push(format!("{}", &tag[1]));
+    let re = Regex::new(r"tags: (?P<tags>.*)").unwrap();
+    let cap = re.captures(&meta_str).unwrap();
+    let tags: Vec<String> = cap
+        .name("tags")
+        .unwrap()
+        .as_str()
+        .split(",")
+        .map(|s| s.to_owned())
+        .collect();
+
+    if let Err(why) = path.metadata() {
+        println!("Error: {:?}", why.kind());
     }
 
-    Meta {
-        titie: title.as_str().to_owned(),
-        excerpt: excerpt.as_str().to_owned(),
-        created_at: 0,
-        update_at: 0,
-        tags: tags,
-    }
+    let metadata = path.metadata().unwrap();
+
+    Meta::new(
+        title.as_str().to_owned(),
+        excerpt.as_str().to_owned(),
+        tags,
+        metadata
+            .created()
+            .unwrap()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs(),
+        metadata
+            .modified()
+            .unwrap()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs(),
+    )
 }
 
 pub fn get_content(md: &str) -> &str {

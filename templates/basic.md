@@ -1,9 +1,8 @@
 ---
-title:
-excerpt:
-createdAt:
-updatedAt:
-tags:
+title: タイトル
+excerpt: ひとこと
+tags: web
 ---
 
 # title
+

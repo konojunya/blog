@@ -28,7 +28,7 @@ pub fn cat(path: &Path) -> io::Result<String> {
 }
 
 pub fn ignore_case_regex() -> Regex {
-    Regex::new(r"/(\.|index.html)").unwrap()
+    Regex::new(r"/(\.|index.html|assets)").unwrap()
 }
 
 pub fn double_quote_regex() -> Regex {

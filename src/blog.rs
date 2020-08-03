@@ -1,4 +1,4 @@
-use crate::{markdown, utils};
+use crate::{abs_path, markdown, utils};
 use handlebars::Handlebars;
 use regex::Regex;
 use serde::{Deserialize, Serialize};

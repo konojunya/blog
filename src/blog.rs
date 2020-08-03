@@ -42,7 +42,7 @@ pub fn create_markdown_file(slug: &str) -> io::Result<()> {
     }
 
     let dname = format!("content/{}", slug);
-    let dir_path = &Path::new(&dname);
+    let dir_path = abs_path!(slug);
     if !dir_path.exists() {
         if let Err(why) = fs::create_dir_all(dname) {
             return Err(Error::new(

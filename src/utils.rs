@@ -50,3 +50,10 @@ pub fn list() -> Vec<Result<DirEntry, io::Error>> {
 
     ps
 }
+
+#[macro_export]
+macro_rules! abs_path {
+    ($x:expr) => {
+        Path::new(format!("content/{}", $x))
+    };
+}

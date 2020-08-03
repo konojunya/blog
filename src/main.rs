@@ -10,6 +10,8 @@ mod blog;
 mod cli;
 mod command;
 mod markdown;
+
+#[macro_use]
 mod utils;
 
 fn main() {

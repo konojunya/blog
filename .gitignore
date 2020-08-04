@@ -17,4 +17,6 @@ Cargo.lock
 /target
 #**/*.rs.bk
 
-content/**/*.html
+**/credentials.json
+/ops/terraform/*
+!/ops/terraform/main.tf

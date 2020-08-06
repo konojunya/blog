@@ -6,3 +6,5 @@ tags: web
 
 # title
 
+CIでdeployされた記事です。
+

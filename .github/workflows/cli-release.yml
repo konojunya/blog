@@ -1,4 +1,4 @@
-name: blog cli Release
+name: Release
 
 on:
   push:
@@ -99,3 +99,4 @@ jobs:
           asset_path: ./build-${{ matrix.target }}/blog-${{ matrix.target }}.zip
           asset_name: blog-${{ matrix.target }}.zip
           asset_content_type: application/zip
+

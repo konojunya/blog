@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate clap;
 extern crate chrono;
+extern crate crypto;
 extern crate handlebars;
 extern crate pulldown_cmark;
 extern crate regex;
@@ -9,6 +10,7 @@ extern crate serde;
 mod blog;
 mod cli;
 mod command;
+mod hash;
 mod markdown;
 mod utils;
 

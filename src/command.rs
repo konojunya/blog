@@ -9,11 +9,12 @@ pub fn create_template(slug: &str) {
 
 pub fn build(slug: Option<&str>) {
     match slug {
-        Some(s) => {
-            let path = format!("content/{}", s);
-            blog::build_specific(&path);
+        Some(slug) => {
+            blog::build_specific(&slug);
         }
-        None => blog::build_all(),
+        None => {
+            blog::build_all();
+        }
     }
 
     blog::build_top();

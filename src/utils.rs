@@ -35,6 +35,10 @@ pub fn double_quote_regex() -> Regex {
     Regex::new(r#""(?P<slug>.*)""#).unwrap()
 }
 
+pub fn only_slug() -> Regex {
+    Regex::new(r"content/(?P<slug>.*)").unwrap()
+}
+
 pub fn list() -> Vec<Result<DirEntry, io::Error>> {
     let list = read_dir("content");
     let paths = list.unwrap();

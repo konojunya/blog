@@ -1,4 +1,4 @@
-use crate::{markdown, utils};
+use crate::{hash, markdown, utils};
 use handlebars::Handlebars;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -69,27 +69,33 @@ pub fn create_markdown_file(slug: &str) -> io::Result<()> {
     utils::echo(&tmp, new_filepath)
 }
 
-pub fn build_all() {
+pub fn build_all() -> String {
     let paths = utils::list();
+    let mut commits = vec![];
 
     for path in paths {
         let path = format!("{:?}", path.unwrap().path());
-        let slug = utils::double_quote_regex().replace_all(&path, "$slug");
+        let path = utils::double_quote_regex().replace_all(&path, "$slug");
+        let slug = utils::only_slug().replace_all(&path, "$slug");
 
-        build_specific(&slug);
+        let commit = format!("{}", build_specific(&slug));
+        commits.push(format!("{} {}", slug, commit));
     }
+
+    commits.join("\n")
 }
 
-pub fn build_specific(path: &str) {
-    let p = format!("{}/index.md", path);
+pub fn build_specific(slug: &str) -> String {
+    let p = format!("content/{}/index.md", slug);
     let markdown_path = &Path::new(&p);
     let template = Path::new("templates/post.html");
     let header_template = Path::new("templates/header.html");
+    let commit = hash::Commit::new(slug).unwrap();
 
     match utils::cat(markdown_path) {
         Err(why) => println!("Error: {:?}", why.kind()),
         Ok(_) => {
-            let fname = format!("{}/index.html", path);
+            let fname = format!("content/{}/index.html", slug);
             let html_path = &Path::new(&fname);
             let mut handlebars = Handlebars::new();
 
@@ -105,6 +111,7 @@ pub fn build_specific(path: &str) {
                 }
             }
 
+            let path = format!("content/{}", slug);
             let entry = Entry::new(&path);
             let template = handlebars
                 .render_template(&utils::cat(&template).unwrap(), &entry)
@@ -115,6 +122,8 @@ pub fn build_specific(path: &str) {
             }
         }
     }
+
+    commit.hash()
 }
 
 pub fn get_entries() -> Vec<Entry> {

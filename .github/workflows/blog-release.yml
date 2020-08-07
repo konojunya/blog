@@ -1,0 +1,46 @@
+name: blog Release
+
+# on:
+#   push:
+#     branches:
+#       - master
+#  test用
+on: push
+
+env:
+  IMAGE: gcr.io/blog-konojunya-com/blog:${{ github.sha }}
+
+jobs:
+  do:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: wget blog cli
+        run: |
+          wget --header='Accept: application/octet-stream' https://github.com/konojunya/blog/releases/latest/download/blog-x86_64-unknown-linux-gnu.zip
+          unzip blog-x86_64-unknown-linux-gnu.zip
+          ./blog -h
+
+      - name: blog build
+        run: ./blog build
+
+      - name: GCP Authenticate
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '274.0.0'
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure docker to use the gcloud cli
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build a docker image
+        run: docker build . -t $IMAGE
+
+      - name: Push the docker image
+        run: docker push $IMAGE
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy blog --image $IMAGE --project blog-konojunya-com --region asia-northeast1 --platform managed --quiet

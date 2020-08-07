@@ -9,7 +9,7 @@ build:
 	docker build . -t $(IMAGE_URL)
 
 serve:
-	env PORT=8080 docker run -p 8080:8080 nginx-server
+	env PORT=8080 docker run -p 8080:8080 $(IMAGE_URL)
 
 push:
 	gcloud builds submit --tag $(IMAGE_URL)

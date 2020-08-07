@@ -1,5 +1,5 @@
 use regex::Regex;
-use std::fs::{read_dir, DirEntry, File, OpenOptions};
+use std::fs::{read_dir, File, OpenOptions};
 use std::io;
 use std::io::prelude::*;
 use std::path::Path;
@@ -28,25 +28,48 @@ pub fn cat(path: &Path) -> io::Result<String> {
 }
 
 pub fn ignore_case_regex() -> Regex {
-    Regex::new(r"/(\.|index.html|assets)").unwrap()
+    Regex::new(r"^(assets|\.+)").unwrap()
 }
 
-pub fn double_quote_regex() -> Regex {
-    Regex::new(r#""(?P<slug>.*)""#).unwrap()
-}
+pub fn list() -> io::Result<Vec<String>> {
+    Ok(read_dir("content")?
+        .filter_map(|entry| {
+            let entry = entry.ok()?;
+            if entry.file_type().ok()?.is_dir() {
+                let file_name = entry.file_name().to_string_lossy().into_owned();
 
-pub fn list() -> Vec<Result<DirEntry, io::Error>> {
-    let list = read_dir("content");
-    let paths = list.unwrap();
-
-    let ps: Vec<_> = paths
-        .filter(move |path| {
-            let p = format!("{:?}", path.as_ref().unwrap().path());
-            let is_dir = Path::new(&p).is_dir();
-
-            !ignore_case_regex().is_match(&p) && !is_dir
+                if !ignore_case_regex().is_match(&file_name) {
+                    Some(file_name)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
         })
-        .collect();
+        .collect())
+}
 
-    ps
+#[macro_export]
+macro_rules! abs_path {
+    ($x: expr) => {{
+        let path = format!("content/{}", $x);
+        Path::new(&path).to_owned()
+    }};
+}
+
+#[macro_export]
+macro_rules! md_path {
+    ($x: expr) => {{
+        let path = format!("content/{}/index.md", $x);
+        Path::new(&path).to_owned()
+    }};
+}
+
+#[macro_export]
+macro_rules! html_path {
+    ($x: expr) => {{
+        let path = format!("content/{}/index.html", $x);
+        Path::new(&path).to_owned()
+    }};
 }

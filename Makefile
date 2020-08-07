@@ -1,10 +1,5 @@
 IMAGE_URL := gcr.io/blog-konojunya-com/blog
 
-clean:
-	rm -rf content
-	mkdir content
-	touch content/.gitkeep
-
 build:
 	docker build . -t $(IMAGE_URL)
 

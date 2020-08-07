@@ -18,16 +18,23 @@ fn main() {
     // create command
     if let Some(ref matches) = matches.subcommand_matches("create") {
         let slug = matches.value_of("slug").unwrap();
-        command::create_template(slug);
+
+        if let Err(why) = command::create_template(slug) {
+            println!("{:?}", why.kind());
+        }
     }
 
     // build command
     if let Some(ref matches) = matches.subcommand_matches("build") {
-        command::build(matches.value_of("slug"));
+        if let Err(why) = command::build(matches.value_of("slug")) {
+            println!("{:?}", why.kind());
+        }
     }
 
     // list command
     if let Some(_) = matches.subcommand_matches("list") {
-        command::list();
+        if let Err(why) = command::list() {
+            println!("{:?}", why.kind());
+        }
     }
 }

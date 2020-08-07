@@ -1,32 +1,29 @@
 use crate::{blog, utils};
-use regex::Regex;
+use std::io;
 
-pub fn create_template(slug: &str) {
-    if let Err(why) = blog::create_markdown_file(slug) {
-        println!("{:?}", why.kind());
-    }
+pub fn create_template(slug: &str) -> io::Result<()> {
+    blog::create_markdown_file(slug)
 }
 
-pub fn build(slug: Option<&str>) {
+pub fn build(slug: Option<&str>) -> io::Result<()> {
     match slug {
         Some(s) => {
-            let path = format!("content/{}", s);
-            blog::build_specific(&path);
+            blog::build_specific(&s)?;
         }
-        None => blog::build_all(),
+        None => {
+            blog::build_all()?;
+        }
     }
 
-    blog::build_top();
+    blog::build_top()
 }
 
-pub fn list() {
-    let paths = utils::list();
-    let only_slug = Regex::new(r"content/").unwrap();
+pub fn list() -> io::Result<()> {
+    let slugs = utils::list()?;
 
-    for path in paths {
-        let p = format!("{:?}", path.unwrap().path());
-        let o = only_slug.replace_all(&p, "");
-        let slug = utils::double_quote_regex().replace_all(&o, "$slug");
+    for slug in slugs {
         println!("{}", slug);
     }
+
+    Ok(())
 }

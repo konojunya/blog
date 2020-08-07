@@ -1,5 +1,4 @@
-use crate::markdown;
-use crate::utils;
+use crate::{markdown, md_path, utils};
 use chrono::{DateTime, Local, TimeZone};
 use pulldown_cmark::{html, Parser};
 use regex::Regex;
@@ -18,9 +17,9 @@ pub struct Meta {
 }
 
 impl Meta {
-    pub fn new(path: &str) -> Meta {
-        let path = Path::new(path);
-        let md = utils::cat(path).unwrap();
+    pub fn new(slug: &str) -> Meta {
+        let md_path = md_path!(slug);
+        let md = utils::cat(&md_path).unwrap();
         let sp: Vec<&str> = md.splitn(3, "---").collect();
         let meta_str = sp[1];
 
@@ -45,11 +44,11 @@ impl Meta {
             .map(|s| s.to_owned())
             .collect();
 
-        if let Err(why) = path.metadata() {
+        if let Err(why) = md_path.metadata() {
             println!("Error: {:?}", why.kind());
         }
 
-        let metadata = path.metadata().unwrap();
+        let metadata = md_path.metadata().unwrap();
 
         Meta {
             title: title.as_str().to_owned(),

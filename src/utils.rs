@@ -1,9 +1,11 @@
 use regex::Regex;
 use std::fs::{read_dir, File, OpenOptions};
-use std::io;
 use std::io::prelude::*;
+use std::io::{stdout, Write};
 use std::path::Path;
+use std::time::Duration;
 use std::vec::Vec;
+use std::{io, thread};
 
 pub fn touch(path: &Path) -> io::Result<()> {
     match OpenOptions::new().create(true).write(true).open(path) {
@@ -48,6 +50,29 @@ pub fn list() -> io::Result<Vec<String>> {
             }
         })
         .collect())
+}
+
+pub fn print_progress(slug: &str, progress: usize, complete: bool) {
+    if progress == 0 {
+        print!("\x1b[38;5;6mBuilding []: {}\r\x1b[m", slug);
+    } else {
+        let percent = progress / 5;
+        let arrow = vec!["="; percent];
+        print!(
+            "\x1b[38;5;6mBuilding [{}>]: {}\r\x1b[m",
+            arrow.join(""),
+            slug
+        );
+        if complete {
+            println!(
+                "\x1b[38;5;2mFinished [====================>]: {}\r\x1b[m",
+                slug
+            );
+        }
+    }
+
+    stdout().flush().unwrap();
+    thread::sleep(Duration::from_millis(100));
 }
 
 #[macro_export]

@@ -1,9 +1,11 @@
-use crate::{abs_path, html_path, markdown, md_path, utils};
+use crate::{abs_path, command, html_path, markdown, md_path, utils};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind};
 use std::path::Path;
+use std::sync;
 use std::{fs, io};
+use threadpool::ThreadPool;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Entry {
@@ -48,22 +50,48 @@ pub fn create_markdown_file(slug: &str) -> io::Result<()> {
     utils::echo(&md, new_filepath)
 }
 
-pub fn build_all() -> io::Result<()> {
+pub fn build_all(option: command::BuildOption) -> io::Result<()> {
     let slugs = utils::list()?;
+    let pool = ThreadPool::new(4);
+    let (tx, rx) = sync::mpsc::channel();
+    let build_option = command::BuildOption { silent: true };
 
-    for slug in slugs {
-        build_specific(&slug)?;
+    for slug in slugs.to_owned() {
+        let tx = tx.clone();
+        pool.execute(move || {
+            build_specific(slug.to_owned(), build_option).unwrap();
+            tx.send(slug).unwrap();
+        });
     }
+
+    if !option.silent {
+        for slug in rx.iter().take(slugs.len()) {
+            utils::print_progress(&slug, 50, false);
+        }
+
+        utils::print_progress("all blog entries", 100, true);
+    }
+
+    pool.join();
 
     Ok(())
 }
 
-pub fn build_specific(slug: &str) -> io::Result<()> {
+pub fn build_specific(slug: String, option: command::BuildOption) -> io::Result<()> {
+    if !option.silent {
+        utils::print_progress(&slug, 0, false);
+    }
+
     // initialize handlebars
     let template = Path::new("templates/post.html");
     let header_template = Path::new("templates/header.html");
     let mut handlebars = Handlebars::new();
-    let html_path = html_path!(slug);
+    let html_path = html_path!(&slug);
+
+    // progress pring
+    if !option.silent {
+        utils::print_progress(&slug, 25, false);
+    }
 
     if let Err(why) =
         handlebars.register_partial("headerPartial", utils::cat(&header_template).unwrap())
@@ -71,16 +99,30 @@ pub fn build_specific(slug: &str) -> io::Result<()> {
         println!("{:?}", why);
     }
 
+    if !option.silent {
+        utils::print_progress(&slug, 50, false);
+    }
+
     if !html_path.exists() {
         utils::touch(&html_path)?;
     }
 
-    let entry = Entry::new(slug);
+    if !option.silent {
+        utils::print_progress(&slug, 75, false);
+    }
+
+    let entry = Entry::new(&slug);
     let template = handlebars
         .render_template(&utils::cat(&template).unwrap(), &entry)
         .unwrap();
 
-    utils::echo(&template, &html_path)
+    let result = utils::echo(&template, &html_path);
+
+    if !option.silent {
+        utils::print_progress(&slug, 100, true);
+    }
+
+    result
 }
 
 pub fn get_entries() -> io::Result<Vec<Entry>> {

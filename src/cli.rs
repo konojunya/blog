@@ -24,6 +24,18 @@ pub fn build_cli() -> App<'static, 'static> {
                     Arg::with_name("slug").help(
                         "blog build [slug] will build specific markdown in content directory.",
                     ),
+                )
+                .arg(
+                    Arg::with_name("silent")
+                        .short("s")
+                        .long("silent")
+                        .help("the log at build will not be output."),
+                )
+                .arg(
+                    Arg::with_name("watch")
+                        .short("w")
+                        .long("watch")
+                        .help("watch file changes."),
                 ),
         )
         .subcommand(SubCommand::with_name("list").about("list of contents"))

@@ -5,6 +5,7 @@ extern crate handlebars;
 extern crate pulldown_cmark;
 extern crate regex;
 extern crate serde;
+extern crate threadpool;
 
 mod blog;
 mod cli;
@@ -26,7 +27,17 @@ fn main() {
 
     // build command
     if let Some(ref matches) = matches.subcommand_matches("build") {
-        if let Err(why) = command::build(matches.value_of("slug")) {
+        let build_option = command::BuildOption {
+            silent: matches.is_present("silent"),
+        };
+
+        if matches.is_present("watch") {
+            if let Err(why) = command::watch() {
+                println!("{:?}", why.kind());
+            }
+        }
+
+        if let Err(why) = command::build(matches.value_of("slug"), build_option) {
             println!("{:?}", why.kind());
         }
     }

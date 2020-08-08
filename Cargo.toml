@@ -14,3 +14,5 @@ pulldown-cmark = "0.7.2"
 handlebars = "3.3.0"
 serde = {version = "1.0.114", features = ["derive"] }
 chrono = "0.4.13"
+notify = "4.0.12"
+threadpool = "1.8.1"

@@ -6,4 +6,3 @@ tags: web
 
 # title
 
-hoge

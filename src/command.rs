@@ -1,5 +1,5 @@
 use crate::{blog, utils};
-use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
+use notify::{watcher, RecursiveMode, Watcher};
 use std::io;
 use std::sync::mpsc::channel;
 use std::time::Duration;

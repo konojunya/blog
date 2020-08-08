@@ -20,5 +20,7 @@ Cargo.lock
 **/credentials.json
 /ops/terraform/*
 !/ops/terraform/main.tf
+/content/*
+!/content/**/index.md
 
 node_modules/

@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<title>ブログ</title>
-<meta http-equiv="content-type" charset="utf-8">
-<link rel="stylesheet" type="text/css" href="/assets/style.css">
-<main>
-  {{> headerPartial}}
-  <h1>Archive</h1>
-  <ul>
-    {{#each this}}
-    <li>
-      <time datetime="{{meta.created_at}}">{{meta.created_at}}</time>
-      <a href="{{slug}}">{{meta.title}}</a>
-    </li>
-    {{/each}}
-  </ul>
-</main>
+<html lang="ja">
+  <title>ブログ</title>
+  <meta http-equiv="content-type" charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/assets/style.css">
+  <main>
+    {{> headerPartial}}
+    <h1>Archive</h1>
+    <ul>
+      {{#each this}}
+      <li>
+        <time datetime="{{meta.created_at}}">{{meta.created_at}}</time>
+        <a href="{{slug}}">{{meta.title}}</a>
+      </li>
+      {{/each}}
+    </ul>
+  </main>
+  <script defer src="/assets/main.js"></script>
 </html>

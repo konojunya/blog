@@ -1,30 +1,33 @@
 <!DOCTYPE html>
-<title>{{meta.title}}</title>
-<meta http-equiv="content-type" charset="utf-8">
-<link rel="stylesheet" type="text/css" href="/assets/style.css">
-<link rel="stylesheet" type="text/css" href="/assets/post.css">
-<main>
-  {{> headerPartial}}
-  <dl>
-    <div>
-      <dt>created_at:</dt>
-      <dd><time datetime="{{meta.created_at}}">{{meta.created_at}}</time></dd>
-    </div>
-    <div>
-      <dt>updated_at:</dt>
-      <dd><time datetime="{{meta.updated_at}}">{{meta.updated_at}}</time></dd>
-    </div>
-    <div>
-      <dt>tags:</dt>
-      <dd>[
-        {{#each meta.tags}}
-        <a href="/tags/{{this}}.html">{{this}}</a>
-        {{/each}}
-      ]</dd>
-    </div>
-  </dl>
-  <article>
-    {{{content}}}
-  </article>
-</main>
+<html lang="ja">
+  <title>{{meta.title}}</title>
+  <meta http-equiv="content-type" charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/assets/style.css">
+  <link rel="stylesheet" type="text/css" href="/assets/post.css">
+  <main>
+    {{> headerPartial}}
+    <dl>
+      <div>
+        <dt>created_at:</dt>
+        <dd><time datetime="{{meta.created_at}}">{{meta.created_at}}</time></dd>
+      </div>
+      <div>
+        <dt>updated_at:</dt>
+        <dd><time datetime="{{meta.updated_at}}">{{meta.updated_at}}</time></dd>
+      </div>
+      <div>
+        <dt>tags:</dt>
+        <dd>[
+          {{#each meta.tags}}
+          <a href="/tags/{{this}}.html">{{this}}</a>
+          {{/each}}
+        ]</dd>
+      </div>
+    </dl>
+    <article>
+      {{{content}}}
+    </article>
+  </main>
+  <script defer src="/assets/main.js"></script>
 </html>

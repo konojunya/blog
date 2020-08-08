@@ -1,0 +1,17 @@
+{
+  "name": "blog",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:konojunya/blog.git",
+  "author": "konojunya <junya03dance@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "postcss templates/*.css -d content/assets/"
+  },
+  "dependencies": {
+    "autoprefixer": "^9.8.6",
+    "cssnano": "^4.1.10",
+    "postcss": "^7.0.32",
+    "postcss-cli": "^7.1.1"
+  }
+}

@@ -1,6 +1,8 @@
 IMAGE_URL := gcr.io/blog-konojunya-com/blog
 
 build:
+	yarn build
+	./target/debug/blog build
 	docker build . -t $(IMAGE_URL)
 
 serve:

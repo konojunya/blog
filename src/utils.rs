@@ -52,12 +52,12 @@ pub fn list() -> io::Result<Vec<String>> {
         .collect())
 }
 
-pub fn print_progress(slug: &str, progress: usize, complete: bool) {
-    if progress == 0 {
+pub fn print_progress(slug: &str, progress: f32, complete: bool) {
+    if progress == 0f32 {
         print!("\x1b[38;5;6mBuilding []: {}\r\x1b[m", slug);
     } else {
-        let percent = progress / 5;
-        let arrow = vec!["="; percent];
+        let percent = progress / 5f32;
+        let arrow = vec!["="; percent as usize];
         print!(
             "\x1b[38;5;6mBuilding [{}>]: {}\r\x1b[m",
             arrow.join(""),

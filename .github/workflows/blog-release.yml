@@ -1,11 +1,9 @@
 name: blog Release
 
-# on:
-#   push:
-#     branches:
-#       - master
-#  test用
-on: push
+on:
+  push:
+    branches:
+      - master
 
 env:
   IMAGE: gcr.io/blog-konojunya-com/blog:${{ github.sha }}
@@ -15,6 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.7.0'
+      - uses: actions/cache@preview
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: yarn build
+        run: |
+          yarn --frozen-lockfile
+          yarn build
 
       - name: wget blog cli
         run: |

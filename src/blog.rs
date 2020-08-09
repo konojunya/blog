@@ -65,11 +65,14 @@ pub fn build_all(option: command::BuildOption) -> io::Result<()> {
     }
 
     if !option.silent {
-        for slug in rx.iter().take(slugs.len()) {
-            utils::print_progress(&slug, 50, false);
+        let receives = rx.iter().take(slugs.len()).enumerate();
+        for (i, slug) in receives {
+            let per = (i + 1) as f32 / slugs.len() as f32;
+            let progress = per * 100f32;
+            utils::print_progress(&slug, progress.round(), false);
         }
 
-        utils::print_progress("all blog entries", 100, true);
+        utils::print_progress("all blog entries", 100f32, true);
     }
 
     pool.join();
@@ -79,7 +82,7 @@ pub fn build_all(option: command::BuildOption) -> io::Result<()> {
 
 pub fn build_specific(slug: String, option: command::BuildOption) -> io::Result<()> {
     if !option.silent {
-        utils::print_progress(&slug, 0, false);
+        utils::print_progress(&slug, 0f32, false);
     }
 
     // initialize handlebars
@@ -90,7 +93,7 @@ pub fn build_specific(slug: String, option: command::BuildOption) -> io::Result<
 
     // progress pring
     if !option.silent {
-        utils::print_progress(&slug, 25, false);
+        utils::print_progress(&slug, 25f32, false);
     }
 
     if let Err(why) =
@@ -100,7 +103,7 @@ pub fn build_specific(slug: String, option: command::BuildOption) -> io::Result<
     }
 
     if !option.silent {
-        utils::print_progress(&slug, 50, false);
+        utils::print_progress(&slug, 50f32, false);
     }
 
     if !html_path.exists() {
@@ -108,7 +111,7 @@ pub fn build_specific(slug: String, option: command::BuildOption) -> io::Result<
     }
 
     if !option.silent {
-        utils::print_progress(&slug, 75, false);
+        utils::print_progress(&slug, 75f32, false);
     }
 
     let entry = Entry::new(&slug);
@@ -119,7 +122,7 @@ pub fn build_specific(slug: String, option: command::BuildOption) -> io::Result<
     let result = utils::echo(&template, &html_path);
 
     if !option.silent {
-        utils::print_progress(&slug, 100, true);
+        utils::print_progress(&slug, 100f32, true);
     }
 
     result
